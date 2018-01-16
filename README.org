@@ -11,6 +11,13 @@
   
   这里包括基础知识、专业知识和工具的学习。
 
+  书籍：
+  - [[https://github.com/exacity/deeplearningbook-chinese][《深度学习》]]
+
+    
+  笔记：
+  - [[./docs/deep-learning-book-note.org][《深度学习》笔记]]
+
 * 第二阶段 实现
 
 * 第三阶段 测试优化
