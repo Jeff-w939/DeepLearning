@@ -12,11 +12,11 @@
   这里包括基础知识、专业知识和工具的学习。
 
   书籍：
-  - [[https://github.com/exacity/deeplearningbook-chinese][《深度学习》]]
+  - [[https://github.com/exacity/deeplearningbook-chinese][《深度学习》 ]]-- [[./docs/deep-learning-book-note.org][《深度学习》笔记]]
 
     
-  笔记：
-  - [[./docs/deep-learning-book-note.org][《深度学习》笔记]]
+  实践：
+  - [[https://www.zybuluo.com/hanbingtao/note/433855][零基础入门深度学习(1) - 感知器]] -- [[][相关代码]]
 
 * 第二阶段 实现
 
