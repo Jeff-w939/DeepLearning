@@ -6,7 +6,7 @@ class Perceptron(object):
         初始化感知器，设置输入参数的个数，以及激活函数。
         激活函数的类型为double -> double
         '''
-        self.activator = activator;
+        self.activator = activator
         # 权重向量初始化为0
         self.weights = [0.0 for _ in range(input_num)]
         # 偏置项初始化为0
@@ -50,12 +50,15 @@ class Perceptron(object):
             # 更新权重
             self._update_weights(input_vec, output, label, rate)
 
+
     def _update_weights(self, input_vec, output, label, rate):
         '''
         按照感知器规则更新权重
+
+        ??? TODO 疑问：为什么可以这样更新？
         '''
-        # 把input_vec[x1,x2,x3,...]和weights[w1,w2,w3,...]打包在一起
-        # 变成[(x1,w1),(x2,w2),(x3,w3),...]
+        # 把input_vec[x1, x2, x3, ...]和weights[w1, w2, w3, ...]打包在一起
+        # 变成[(x1,w1), (x2,w2), (x3,w3), ...]
         # 然后利用感知器规则更新权重
         delta = label - output
         self.weights = list(map(
@@ -77,10 +80,10 @@ def get_training_dataset():
     '''
     # 构建训练数据
     # 输入向量列表
-    input_vecs = [[1,1], [0,0], [1,0], [0,1]]
+    input_vecs = [[0, 0], [1, 0], [0, 1], [1, 1]]
     # 期望的输出列表，注意要与输入一一对应
-    # [1,1] -> 1, [0,0] -> 0, [1,0] -> 0, [0,1] -> 0
-    labels = [1, 0, 0, 0]
+    # [1, 1] -> 1, [0, 0] -> 0, [1, 0] -> 0, [0, 1] -> 0
+    labels = [0, 0, 0, 1]
     return input_vecs, labels
 
 def train_and_perceptron():
