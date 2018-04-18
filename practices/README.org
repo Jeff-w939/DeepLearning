@@ -1,0 +1,17 @@
+#+TITLE: 入门实践
+#+DATE: <2018-04-18 周三 16:08>
+
+* 第一篇 感知器
+  内容：[[https://www.zybuluo.com/hanbingtao/note/433855][零基础入门深度学习(1) - 感知器]]
+  代码：[[./perceptron.py][perceptron.py]]
+
+
+  介绍了一个感知器的构成。
+
+  关键内容：权值，向量相乘，激活函数
+
+* 第二篇 线性单元
+  内容：[[https://www.zybuluo.com/hanbingtao/note/448086][零基础入门深度学习(2) - 线性单元和梯度下降]]
+  代码：[[./linear_unit.py][linear_unit.py]]
+
+  介绍了线性单元的结构，和权值的更新方法（梯度下降算法）

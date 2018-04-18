@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
+
 from perceptron import Perceptron
+
 
 def f(x):
     '''定义激活函数f'''
     return x
+
 
 class LinearUnit(Perceptron):
     def __init__(self, input_num):
@@ -11,9 +15,7 @@ class LinearUnit(Perceptron):
 
 
 def get_training_dataset():
-    '''
-    捏造5个人的收入数据
-    '''
+    '''捏造5个人的收入数据'''
     # 构建训练数据
     # 输入向量列表，每一项是工作年限
     input_vecs = [[5], [3], [8], [1.4], [10.1]]
@@ -31,7 +33,7 @@ def train_linear_unit():
     # 训练，迭代10轮, 学习速率为0.01
     input_vecs, labels = get_training_dataset()
     lu.train(input_vecs, labels, 10, 0.01)
-    #返回训练好的线性单元
+    # 返回训练好的线性单元
     return lu
 
 

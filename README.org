@@ -14,9 +14,8 @@
   书籍：
   - [[https://github.com/exacity/deeplearningbook-chinese][《深度学习》 ]]-- [[./docs/deep-learning-book-note.org][《深度学习》笔记]]
 
-    
-  实践：
-  - [[https://www.zybuluo.com/hanbingtao/note/433855][零基础入门深度学习(1) - 感知器]] -- [[./practices/perception.py][相关代码]]
+
+  实践：[[./practices/][相关代码]]
 
 * 第二阶段 实现
 
