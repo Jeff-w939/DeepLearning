@@ -1,18 +1,20 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from functools import reduce
 from math import exp
 import random
 
 
 def sigmoid(x):
-    return 1.0 / (1 + exp(-x))
+    try:
+        expx = exp(-x)
+    except OverflowError:
+        expx = float('inf')
+    return 1.0 / (1 + expx)
 
 
 class Node(object):
-    '''
-    节点类，负责记录和维护节点自身信息以及与这个节点相关的上下游连接，实现输出值和误差项的计算。
-    '''
+    '''负责记录和维护节点自身信息及与这个节点相关的上下游连接，实现输出值和误差项的计算。'''
 
     def __init__(self, layer_index, node_index):
         '''
@@ -27,25 +29,21 @@ class Node(object):
         self.delta = 0
 
     def __str__(self):
-        '''
-        打印节点的信息
-        '''
+        '''打印节点的信息'''
         node_str = '%u-%u: output: %f delta: %f\n' % (
             self.layer_index,
             self.node_index,
             self.output,
             self.delta
         )
-        downstream_str = reduce(
-            lambda ret, conn: ret + '\n\t' + str(conn),
-            self.downstream,
-            ''
-        )
-        upstream_str = reduce(
-            lambda ret, conn: ret + '\n\t' + str(conn),
-            self.upstream,
-            ''
-        )
+        downstream_str = ''
+        upstream_str = ''
+
+        for conn in self.downstream:
+            downstream_str += '\n\t' + str(conn)
+        for conn in self.upstream:
+            upstream_str += '\n\t' + str(conn)
+
         return '%s\tdownstream:%s\n\tupstream:%s' % (
             node_str,
             downstream_str,
@@ -53,56 +51,39 @@ class Node(object):
         )
 
     def set_output(self, output):
-        '''
-        设置节点的输出值。如果节点属于输入层会用到这个函数。
-        '''
+        '''设置节点的输出值。如果节点属于输入层会用到这个函数。'''
         self.output = output
 
     def append_downstream_connection(self, conn):
-        '''
-        添加一个到下游节点的连接
-        '''
+        '''添加一个到下游节点的连接'''
         self.downstream.append(conn)
 
     def append_upstream_connection(self, conn):
-        '''
-        添加一个到上游节点的连接
-        '''
+        '''添加一个到上游节点的连接'''
         self.upstream.append(conn)
 
     def calc_output(self):
-        '''
-        根据 向量相乘 和 sigmoid函数 计算节点的输出
-        '''
-        output = reduce(
-            lambda ret, conn: ret + conn.upstream_node.output * conn.weight,
-            self.upstream,
-            0.0
-        )
+        '''根据 向量相乘 和 sigmoid函数 计算节点的输出'''
+        output = 0.0
+        for conn in self.upstream:
+            output += conn.upstream_node.output * conn.weight
         self.output = sigmoid(output)
 
     def calc_hidden_layer_delta(self):
-        '''
-        节点属于隐藏层时，根据式4计算delta
-        '''
-        downstream_delta = reduce(
-            lambda ret, conn: ret + conn.downstream_node.delta * conn.weight,
-            self.downstream,
-            0.0
-        )
+        '''节点属于隐藏层时，计算误差'''
+        downstream_delta = 0.0
+        for conn in self.downstream:
+            downstream_delta += conn.downstream_node.delta * conn.weight
         self.delta = self.output * (1 - self.output) * downstream_delta
 
     def calc_output_layer_delta(self, label):
-        '''
-        节点属于输出层时，根据式3计算delta
-        '''
+        '''节点属于输出层时，计算误差'''
         self.delta = self.output * (1 - self.output) * (label - self.output)
 
 
 class ConstNode(object):
-    '''
-    为了实现一个输出恒为1的节点(计算偏置项时需要)
-    '''
+    '''为了实现一个输出恒为1的节点(计算偏置项时需要)'''
+
     def __init__(self, layer_index, node_index):
         '''
         layer_index: 节点所属的层的编号
@@ -114,42 +95,30 @@ class ConstNode(object):
         self.output = 1
 
     def __str__(self):
-        '''
-        打印节点的信息
-        '''
+        '''打印节点的信息'''
         node_str = '%u-%u: output: 1\n' % (self.layer_index, self.node_index)
-        downstream_str = reduce(
-            lambda ret, conn: ret + '\n\t' + str(conn),
-            self.downstream,
-            ''
-        )
+        downstream_str = ''
+        for conn in self.downstream:
+            downstream_str += '\n\t' + str(conn)
         return node_str + '\tdownstream:' + downstream_str
 
     def append_downstream_connection(self, conn):
-        '''
-        添加一个到下游节点的连接
-        '''
+        '''添加一个到下游节点的连接'''
         self.downstream.append(conn)
 
     def calc_hidden_layer_delta(self):
-        '''
-        节点属于隐藏层时，根据式4计算delta
-        '''
-        downstream_delta = reduce(
-            lambda ret, conn: ret + conn.downstream_node.delta * conn.weight,
-            self.downstream,
-            0.0
-        )
+        '''节点属于隐藏层时，根据式4计算delta'''
+        downstream_delta = 0.0
+        for conn in self.downstream:
+            downstream_delta += conn.downstream_node.delta * conn.weight
         self.delta = self.output * (1 - self.output) * downstream_delta
 
 
 class Layer(object):
-    '''
-    Layer对象，负责初始化一层。此外，作为Node的集合对象，提供对Node集合的操作。
-    '''
+    '''Layer对象，负责初始化一层。此外，作为Node的集合对象，提供对Node集合的操作。'''
+
     def __init__(self, layer_index, node_count):
         '''
-        初始化一层
         layer_index: 层编号
         node_count: 层所包含的节点个数
         '''
@@ -162,23 +131,17 @@ class Layer(object):
         self.nodes.append(ConstNode(layer_index, node_count))
 
     def set_output(self, data):
-        '''
-        设置层的输出。当层是输入层时会用到。
-        '''
+        '''设置层的输出。当层是输入层时会用到。'''
         for i in range(len(data)):
             self.nodes[i].set_output(data[i])
 
     def calc_output(self):
-        '''
-        计算层的输出向量
-        '''
+        '''计算层的输出向量'''
         for node in self.nodes[:-1]:
             node.calc_output()
 
     def dump(self):
-        '''
-        打印层的信息
-        '''
+        '''打印层的信息'''
         for node in self.nodes:
             print(node)
 
@@ -196,28 +159,20 @@ class Connection(object):
         self.gradient = 0.0
 
     def calc_gradient(self):
-        '''
-        计算梯度
-        '''
+        '''计算梯度'''
         self.gradient = self.downstream_node.delta * self.upstream_node.output
 
     def get_gradient(self):
-        '''
-        获取当前的梯度
-        '''
+        '''获取当前的梯度'''
         return self.gradient
 
     def update_weight(self, rate):
-        '''
-        根据梯度下降算法更新权重
-        '''
+        '''根据梯度下降算法更新权重'''
         self.calc_gradient()
         self.weight += rate * self.gradient
 
     def __str__(self):
-        '''
-        打印连接信息
-        '''
+        '''打印连接信息'''
         return '(%u-%u) -> (%u-%u) = %f' % (
             self.upstream_node.layer_index,
             self.upstream_node.node_index,
@@ -240,11 +195,10 @@ class Connections(object):
 
 
 class Network(object):
+    '''一个全连接神经网络'''
+
     def __init__(self, layers):
-        '''
-        初始化一个全连接神经网络
-        layers: 二维数组，描述神经网络每层节点数
-        '''
+        '''layers: 二维数组，描述神经网络每层节点数'''
         self.connections = Connections()
         self.layers = []
         layer_count = len(layers)
@@ -256,7 +210,8 @@ class Network(object):
             connections = [
                 Connection(upstream_node, downstream_node)
                 for upstream_node in self.layers[layer].nodes
-                for downstream_node in self.layers[layer + 1].nodes[:-1]]
+                for downstream_node in self.layers[layer + 1].nodes[:-1]
+            ]
             for conn in connections:
                 self.connections.add_connection(conn)
                 conn.downstream_node.append_upstream_connection(conn)
@@ -273,17 +228,13 @@ class Network(object):
                 self.train_one_sample(labels[d], data_set[d], rate)
 
     def train_one_sample(self, label, sample, rate):
-        '''
-        内部函数，用一个样本训练网络
-        '''
+        '''内部函数，用一个样本训练网络'''
         self.predict(sample)
         self.calc_delta(label)
         self.update_weight(rate)
 
     def calc_delta(self, label):
-        '''
-        内部函数，计算每个节点的delta
-        '''
+        '''内部函数，计算每个节点的delta'''
         output_nodes = self.layers[-1].nodes
         for i in range(len(label)):
             output_nodes[i].calc_output_layer_delta(label[i])
@@ -292,18 +243,14 @@ class Network(object):
                 node.calc_hidden_layer_delta()
 
     def update_weight(self, rate):
-        '''
-        内部函数，更新每个连接权重
-        '''
+        '''内部函数，更新每个连接权重'''
         for layer in self.layers[:-1]:
             for node in layer.nodes:
                 for conn in node.downstream:
                     conn.update_weight(rate)
 
     def calc_gradient(self):
-        '''
-        内部函数，计算每个连接的梯度
-        '''
+        '''内部函数，计算每个连接的梯度'''
         for layer in self.layers[:-1]:
             for node in layer.nodes:
                 for conn in node.downstream:
@@ -330,8 +277,6 @@ class Network(object):
         return map(lambda node: node.output, self.layers[-1].nodes[:-1])
 
     def dump(self):
-        '''
-        打印网络信息
-        '''
+        '''打印该网络信息'''
         for layer in self.layers:
             layer.dump()

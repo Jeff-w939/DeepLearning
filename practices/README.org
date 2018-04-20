@@ -3,6 +3,7 @@
 
 * 第一篇 感知器
   内容：[[https://www.zybuluo.com/hanbingtao/note/433855][零基础入门深度学习(1) - 感知器]]
+
   代码：[[./perceptron.py][perceptron.py]]
 
 
@@ -12,6 +13,18 @@
 
 * 第二篇 线性单元
   内容：[[https://www.zybuluo.com/hanbingtao/note/448086][零基础入门深度学习(2) - 线性单元和梯度下降]]
+
   代码：[[./linear_unit.py][linear_unit.py]]
 
   介绍了线性单元的结构，和权值的更新方法（梯度下降算法）
+
+* 第三篇 神经网络和反向传播算法
+  内容：[[https://www.zybuluo.com/hanbingtao/note/476663][零基础入门深度学习(3) - 神经网络和反向传播算法]]
+
+  神经元的激活函数选择为 *sigmoid 函数* 或 tanh 函数。
+
+  一个层可以用一个矩阵表示。
+
+  神经网络的训练算法： *反向传播算法*  ，是一种链式求导法则的应用。
+  误差项的计算是从输出层开始，反向依次是各个隐藏层。
+
