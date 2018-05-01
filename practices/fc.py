@@ -7,11 +7,13 @@ from activators import SigmoidActivator
 from functools import reduce
 
 
-# 全连接层实现类
 class FullConnectedLayer(object):
+    '''
+    全连接层类
+    '''
+
     def __init__(self, input_size, output_size, activator):
         '''
-        构造函数
         input_size: 本层输入向量的维度
         output_size: 本层输出向量的维度
         activator: 激活函数
@@ -28,10 +30,9 @@ class FullConnectedLayer(object):
 
     def forward(self, input_array):
         '''
-        前向计算
+        前向计算，计算输出
         input_array: 输入向量，维度必须等于input_size
         '''
-        # 式2
         self.input = input_array
         self.output = self.activator.forward(
             np.dot(self.W, input_array) + self.b)
@@ -41,7 +42,6 @@ class FullConnectedLayer(object):
         反向计算W和b的梯度
         delta_array: 从上一层传递过来的误差项
         '''
-        # 式8
         self.delta = self.activator.backward(self.input) * np.dot(
             self.W.T, delta_array)
         self.W_grad = np.dot(delta_array, self.input.T)
@@ -58,20 +58,16 @@ class FullConnectedLayer(object):
         print('W: %s\nb:%s' % (self.W, self.b))
 
 
-# 神经网络类
 class Network(object):
+    '''
+    神经网络
+    '''
+
     def __init__(self, layers):
-        '''
-        构造函数
-        '''
         self.layers = []
         for i in range(len(layers) - 1):
             self.layers.append(
-                FullConnectedLayer(
-                    layers[i], layers[i+1],
-                    SigmoidActivator()
-                )
-            )
+                FullConnectedLayer(layers[i], layers[i+1], SigmoidActivator()))
 
     def predict(self, sample):
         '''
@@ -102,9 +98,8 @@ class Network(object):
         self.update_weight(rate)
 
     def calc_gradient(self, label):
-        delta = self.layers[-1].activator.backward(
-            self.layers[-1].output
-        ) * (label - self.layers[-1].output)
+        delta = self.layers[-1].activator.backward(self.layers[-1].output)
+        * (label - self.layers[-1].output)
         for layer in self.layers[::-1]:
             layer.backward(delta)
             delta = layer.delta
@@ -119,7 +114,7 @@ class Network(object):
             layer.dump()
 
     def loss(self, output, label):
-        return 0.5 * ((label - output) * (label - output)).sum()
+        return 0.5 * ((label - output) ** 2).sum()
 
     def gradient_check(self, sample_feature, sample_label):
         '''
