@@ -5,7 +5,7 @@ from fc import Network, transpose
 from datetime import datetime
 
 
-# 数据加载器基类
+# 数据加载器基类n
 class Loader(object):
     def __init__(self, path, count):
         '''
