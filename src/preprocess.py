@@ -3,7 +3,7 @@
 
 from PIL import Image
 import numpy as np
-import cPickle as pickle
+import pickle
 
 img = Image.open('../faces.gif')
 
@@ -21,11 +21,11 @@ for row in range(20):
         ]
         face_data[row * 20 + col] = np.ndarray.flatten(arr)
 
-        im = Image.new("L", (img_rows, img_cols))
-        for i in range(img_rows):
-            for j in range(img_cols):
-                im.putpixel((i, j), (arr[i, j]))
-        im.save('../face%d.gif' % (row * 20 + col))
+        # im = Image.new("L", (img_rows, img_cols))
+        # for i in range(img_rows):
+        #     for j in range(img_cols):
+        #         im.putpixel((i, j), (arr[i, j]))
+        # im.save('../face%d.gif' % (row * 20 + col))
 
 
 face_label = np.empty(400, dtype=int)
