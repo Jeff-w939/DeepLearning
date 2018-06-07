@@ -10,69 +10,40 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 
 
-def faces_load_data():
-    f = open('faces.pkl', 'rb')
+def load_data():
+    f = open('cloth.pickle', 'rb')
     face_data, face_label = pickle.load(f)
 
-    img_rows, img_cols = 57, 47
+    img_rows, img_cols = 64, 64
     img_size = img_rows * img_cols
 
-    x_train = np.empty((360, img_size))
-    y_train = np.empty(360, dtype=int)
+    x_train = np.empty((810, img_size))
+    y_train = np.empty(810, dtype=int)
 
-    x_test = np.empty((40, img_size))
-    y_test = np.empty(40, dtype=int)
+    x_test = np.empty((90, img_size))
+    y_test = np.empty(90, dtype=int)
 
-    for i in range(40):
-        x_train[i * 9:(i + 1) * 9, :] = face_data[i * 10:i * 10 + 9, :]
-        y_train[i * 9:(i + 1) * 9] = face_label[i * 10:i * 10 + 9]
+    for i in range(3):
+        for j in range(90):
+            x_train[i * 90 + j] = np.ndarray.flatten(
+                face_data[i * 100 + j] ^ 255)
+            y_train[i * 90 + j] = face_label[i * 100 + j]
 
-        x_test[i] = face_data[i * 10 + 9, :]
-        y_test[i] = face_label[i * 10 + 9]
+        for j in range(10):
+            x_test[i * 10 + j] = np.ndarray.flatten(
+                face_data[i * 100 + 90 + j] ^ 255)
+            y_test[i * 10 + j] = face_label[i * 100 + 90 + j]
 
-    return (x_train, y_train), (x_test, y_test)
+    for i in range(3):
+        for j in range(180):
+            x_train[270 + i * 180 + j] = np.ndarray.flatten(
+                face_data[300 + i * 200 + j] ^ 255)
+            y_train[270 + i * 180 + j] = face_label[300 + i * 200 + j]
 
-
-def mnist_load_data():
-    def get_file_content(path):
-        with open(path, 'rb') as f:
-            content = f.read()
-        return content
-
-    def get_picture(content, size):
-        data_set = []
-        for index in range(size):
-            start = index * 28 * 28 + 16
-            picture = []
-            for i in range(28 * 28):
-                picture.append(ord(content[start + i]))
-            data_set.append(picture)
-        return np.array(data_set)
-
-    def get_labels(content, size):
-        labels = []
-        for index in range(size):
-            labels.append(ord(content[index + 8]))
-        return np.array(labels)
-
-    train_size = 60000
-    test_size = 10000
-    x_train = get_picture(
-        get_file_content('../data/train-images-idx3-ubyte'),
-        train_size
-    )
-    y_train = get_labels(
-        get_file_content('../data/train-labels-idx1-ubyte'),
-        train_size
-    )
-    x_test = get_picture(
-        get_file_content('../data/t10k-images-idx3-ubyte'),
-        test_size
-    )
-    y_test = get_labels(
-        get_file_content('../data/t10k-labels-idx1-ubyte'),
-        test_size
-    )
+        for j in range(20):
+            x_test[30 + i * 20 + j] = np.ndarray.flatten(
+                face_data[300 + i * 200 + 180 + j] ^ 255)
+            y_test[30 + i * 20 + j] = face_label[300 + i * 200 + 180 + j]
 
     return (x_train, y_train), (x_test, y_test)
 
@@ -88,14 +59,9 @@ def main():
     epochs = 12
 
     batch_size = 16
-    num_classes = 40
-    img_rows, img_cols = 57, 47
-    (x_train, y_train), (x_test, y_test) = faces_load_data()
-
-    # batch_size = 128
-    # num_classes = 10
-    # img_rows, img_cols = 28, 28
-    # (x_train, y_train), (x_test, y_test) = mnist_load_data()
+    num_classes = 6
+    img_rows, img_cols = 64, 64
+    (x_train, y_train), (x_test, y_test) = load_data()
 
     if K.image_data_format() == 'channels_first':
         x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
@@ -118,14 +84,18 @@ def main():
     y_test = keras.utils.to_categorical(y_test, num_classes)
 
     model = Sequential()
-    model.add(Conv2D(32, kernel_size=(3, 3),
+    model.add(Conv2D(16, kernel_size=(5, 5),
                      activation='relu',
                      input_shape=input_shape))
-    model.add(Conv2D(32, (3, 3), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(32, (5, 5), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(64, (4, 4), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(120, (5, 5), activation='relu'))
     model.add(Dropout(0.25))
     model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
+    model.add(Dense(84, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(num_classes, activation='softmax'))
 
